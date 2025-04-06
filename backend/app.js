@@ -9,7 +9,11 @@ const database = require('./utils/db');
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'], // Vite default port
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -19,6 +23,7 @@ const budgetRoutes = require('./routes/budgetRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
 const goalRoutes = require('./routes/goalRoutes');
+const financeRoutes = require('./routes/financeRoutes');
 
 // Use routes
 app.use('/api', financialRoutes);
@@ -26,6 +31,7 @@ app.use('/api', budgetRoutes);
 app.use('/api', transactionRoutes);
 app.use('/api', analyticsRoutes);
 app.use('/api', goalRoutes);
+app.use('/api/finance', financeRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

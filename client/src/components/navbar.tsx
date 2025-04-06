@@ -44,7 +44,7 @@ export default function Navbar() {
                     <Link to="/" 
                           className="text-2xl font-bold"
                     >
-                        Gemmarize
+                        ForeCache
                     </Link>
                 </div>
 

@@ -12,22 +12,22 @@ export default function Home() {
           <div className="container mx-auto px-4 flex flex-col md:flex-row items-center gap-12">
             <div className="md:w-1/2 space-y-6">
               <h1 className="text-4xl md:text-6xl font-bold leading-tight">
-                Prepare for the future with  <span className="text-primary">insight</span> into it
+                Prepare for the future with <span className="text-primary">insights</span> into it
               </h1>
               <p className="text-lg text-muted-foreground">
-                Gemmarize generates fresh, challenging questions across various programming languages, adapting to your
+                ForeCache generates fresh, challenging questions across various programming languages, adapting to your
                 skill level for a personalized learning experience.
               </p>
               <div className="flex gap-4 pt-4">
                 <Link to="/rooms">
                   <Button size="lg" className="gap-2" onClick={() => console.log("Start Quiz button clicked")}>
                     <Rocket className="h-5 w-5" />
-                        Gemmarize Now
+                        ForeCache Future
                   </Button>
                 </Link>
                 <Link to="/agents">
                   <Button size="lg" variant="outline">
-                    Explore Topics
+                    Explore lifestyles
                   </Button>
                 </Link>
               </div>
@@ -67,7 +67,7 @@ export default function Home() {
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">Limitless Possibilities</h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Gemmarize combines cutting-edge AI with engaging gameplay to create a unique coding quiz experience
+                ForeCache combines cutting-edge AI with engaging gameplay to create a unique coding quiz experience
               </p>
             </div>
 
@@ -115,7 +115,7 @@ export default function Home() {
             <Link to="/gearbox">
               <Button size="lg" variant="secondary" className="gap-2">
                 <PencilRuler className="h-5 w-5" />
-                Gemmarize Anything
+                ForeCache my Future
               </Button>
             </Link>
           </div>

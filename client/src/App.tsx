@@ -1,4 +1,4 @@
-import { ThemeProvider } from 'next-themes'
+import { ThemeProvider } from './components/theme-provider'
 import AppRoutes from './routes'
 
 function App() {

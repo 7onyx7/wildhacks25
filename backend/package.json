@@ -11,6 +11,7 @@
     "seed": "node scripts/seed-data.js"
   },
   "dependencies": {
+    "@google/genai": "^0.7.0",
     "@google/generative-ai": "^0.2.0",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",

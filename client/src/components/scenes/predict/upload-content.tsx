@@ -13,7 +13,8 @@ import {
 //  Upload,
      MessageSquareWarning,
       Twitter,
-       MailWarning } from "lucide-react"
+       MailWarning, 
+       Upload} from "lucide-react"
 // import { predictTimeline } from "@/hooks/predicter"
 import { useToast } from "@/hooks/use-toast";
 import UploadProgress from "@/components/upload-progress"
@@ -35,11 +36,11 @@ export default function UploadPage() {
 
 
 
-//   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     if (e.target.files && e.target.files[0]) {
-//       setSelectedFile(e.target.files[0])
-//     }
-//   }
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0])
+    }
+  }
 
 
 // Load history on mount
@@ -81,13 +82,13 @@ export default function UploadPage() {
 
     try {
         let content: string | File | undefined
-        let contentType: "tweet" | "text" | "email" | "image" | undefined
+        let contentType: "tweet" | "text" | "email" | "file" | undefined
 
-      if (activeTab === "image") {
+      if (activeTab === "file") {
         if (!selectedFile) {
           toast({
             title: "No file selected",
-            description: "Please select an image to upload",
+            description: "Please choose a file to upload",
             variant: "destructive",
           })
           clearInterval(progressInterval)
@@ -95,7 +96,7 @@ export default function UploadPage() {
           return
         }
         content = selectedFile
-        contentType = "image"
+        contentType = "file"
       } else if (activeTab === "text" || activeTab === "tweet") {
         if (!textContent.trim()) {
           toast({
@@ -112,7 +113,7 @@ export default function UploadPage() {
     }
 
 
-    if (typeof content !== "string" || !contentType || contentType === "image") {
+    if (typeof content !== "string" || !contentType || contentType === "file") {
         toast({
           title: "Unsupported content",
           description: "Only text, tweet, and email are supported for now.",
@@ -202,18 +203,18 @@ export default function UploadPage() {
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
           {/* //TODO: FIX(UI): fix grid cols to match # of active triggers */}
-            <TabsList className="grid w-full grid-cols-3">
-              {/* <TabsTrigger value="image" className="flex items-center gap-2">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="file" className="flex items-center gap-2">
                 <Upload className="h-4 w-4" />
-                <span>Image</span>
-              </TabsTrigger> */}
-              <TabsTrigger value="tweet" className="flex items-center gap-2">
-                <Twitter className="h-4 w-4" />
-                <span>Tweet</span>
+                <span>File</span>
               </TabsTrigger>
               <TabsTrigger value="text" className="flex items-center gap-2">
-                <MessageSquareWarning className="h-4 w-4" />
+                <Twitter className="h-4 w-4" />
                 <span>Text</span>
+              </TabsTrigger>
+              <TabsTrigger value="tweet" className="flex items-center gap-2">
+              <Twitter className="h-4 w-4" />
+                <span>Tweet</span>
               </TabsTrigger>
               <TabsTrigger value="email" className="flex items-center gap-2">
                 <MailWarning className="h-4 w-4" />
@@ -221,7 +222,7 @@ export default function UploadPage() {
               </TabsTrigger>
             </TabsList>
 
-            {/* <TabsContent value="image" className="mt-6">
+            <TabsContent value="file" className="mt-6">
               <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-12 text-center">
                 {selectedFile ? (
                   <div className="flex flex-col items-center">
@@ -234,8 +235,8 @@ export default function UploadPage() {
                 ) : (
                   <>
                     <Upload className="h-8 w-8 mb-4 text-gray-400" />
-                    <p className="text-sm font-medium mb-1">Drag and drop an image, or click to browse</p>
-                    <p className="text-xs text-gray-500 mb-4">Supports JPG, PNG, GIF up to 10MB</p>
+                    <p className="text-sm font-medium mb-1">Drag and drop a file, or click for file explorer</p>
+                    <p className="text-xs text-gray-500 mb-4">Supports PDF, Docx, and Excel up to 10MB</p>
                     <input
                       type="file"
                       id="file-upload"
@@ -251,7 +252,18 @@ export default function UploadPage() {
                   </>
                 )}
               </div>
-            </TabsContent> */}
+              <div className="mt-6">
+                <Textarea
+                  placeholder="Include custom instructions for the summary (e.g., 'Focus on methodology only', 'Use bullet points', 'Highlight key points')"
+                  value={instructions}
+                  onChange={(e) => setInstructions(e.target.value)}
+                  className="min-h-[100px]"
+                />
+                <p className="text-xs text-gray-500 mt-2">
+                  These transactions will be added to your financial context.
+                </p>
+              </div>
+            </TabsContent>
 
             <TabsContent value="text" className="mt-6">
               <Textarea
@@ -263,6 +275,17 @@ export default function UploadPage() {
               <p className="text-xs text-gray-500 mt-2">
                 Transaction will be analyzed to predict financial future.
               </p>
+              <div className="mt-6">
+                <Textarea
+                  placeholder="Include custom instructions for the summary (e.g., 'Focus on methodology only', 'Use bullet points', 'Highlight key points')"
+                  value={instructions}
+                  onChange={(e) => setInstructions(e.target.value)}
+                  className="min-h-[100px]"
+                />
+                <p className="text-xs text-gray-500 mt-2">
+                These transactions will be added to your financial context.
+                </p>
+              </div>
             </TabsContent>
             <TabsContent value="email" className="mt-6">
               <Textarea
@@ -283,6 +306,17 @@ export default function UploadPage() {
                 />
                 <p className="text-xs text-gray-500 mt-2">
                   These instructions will be passed to Gemini to guide the summarization.
+                </p>
+              </div>
+              <div className="mt-6">
+                <Textarea
+                  placeholder="Include custom instructions for the summary (e.g., 'Focus on methodology only', 'Use bullet points', 'Highlight key points')"
+                  value={instructions}
+                  onChange={(e) => setInstructions(e.target.value)}
+                  className="min-h-[100px]"
+                />
+                <p className="text-xs text-gray-500 mt-2">
+                Event will be analyzed to predict financial future.
                 </p>
               </div>
             </TabsContent>
@@ -306,6 +340,17 @@ export default function UploadPage() {
                 />
                 <p className="text-xs text-gray-500 mt-2">
                   These instructions will be passed to Gemini to guide the summarization.
+                </p>
+              </div>
+              <div className="mt-6">
+                <Textarea
+                  placeholder="Include custom instructions for the summary (e.g., 'Focus on methodology only', 'Use bullet points', 'Highlight key points')"
+                  value={instructions}
+                  onChange={(e) => setInstructions(e.target.value)}
+                  className="min-h-[100px]"
+                />
+                <p className="text-xs text-gray-500 mt-2">
+                Event will be analyzed to predict financial future.
                 </p>
               </div>
             </TabsContent>

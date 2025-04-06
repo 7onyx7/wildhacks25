@@ -9,6 +9,7 @@ import { ChatMessageList } from "@/components/chat/chat-message-list";
 import { ChatBubble, ChatBubbleAvatar, ChatBubbleMessage } from "@/components/chat/chat-bubble"; 
 import { ExpandableChat, ExpandableChatHeader, ExpandableChatBody, ExpandableChatFooter  } from "@/components/chat/expandable-chat";
 import { AnimatePresence, motion } from "framer-motion";
+import { useChatStore } from "@/hooks/useChatStore";
 
 interface Message {
   id: string;
@@ -17,22 +18,12 @@ interface Message {
   timestamp: string;
 }
 
-const initialChatSupportMessages: Message[] = [
-  {
-    id: "1",
-    content: "Hello! How can I help you today?",
-    sender: "ai",
-    timestamp: new Date().toLocaleTimeString(),
-  },
-];
-
 export default function ChatSupport() {
-  const [messages, setMessages] = useState<Message[]>(
-    initialChatSupportMessages,
-  );
-  const [inputMessage, setInputMessage] = useState("");
 
+  const [inputMessage, setInputMessage] = useState("");
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const { messages, sendMessage } = useChatStore();
+
 
   useEffect(() => {
     if (messagesContainerRef.current) {
@@ -41,18 +32,13 @@ export default function ChatSupport() {
     }
   }, [messages]);
 
-  const handleSendMessage = () => {
-    if (inputMessage.trim()) {
-      const newMessage: Message = {
-        id: Date.now().toString(),
-        content: inputMessage,
-        sender: "user",
-        timestamp: new Date().toLocaleTimeString(),
-      };
-      setMessages([...messages, newMessage]);
-      setInputMessage("");
-    }
+  const handleSendMessage = async () => {
+    if (!inputMessage.trim()) return;
+  
+    await sendMessage(inputMessage.trim());
+    setInputMessage("");
   };
+  
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -80,48 +66,64 @@ export default function ChatSupport() {
           ref={messagesContainerRef}
           className="dark:bg-muted/40"
         >
-          <AnimatePresence>
-            {messages.map((message, index) => {
-              return (
-                <motion.div
-                  key={index}
-                  layout
-                  initial={{ opacity: 0, scale: 1, y: 10, x: 0 }}
-                  animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
-                  exit={{ opacity: 0, scale: 1, y: 1, x: 0 }}
-                  transition={{
-                    opacity: { duration: 0.1 },
-                    layout: {
-                      type: "spring",
-                      bounce: 0.3,
-                      duration: index * 0.05 + 0.2,
-                    },
-                  }}
-                  style={{ originX: 0.5, originY: 0.5 }}
-                  className="flex flex-col"
+        <AnimatePresence>
+          {/* 👋 Static welcome message */}
+          <motion.div
+            layout
+            initial={{ opacity: 0, scale: 1, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 1, y: 1 }}
+            transition={{
+              opacity: { duration: 0.1 },
+              layout: { type: "spring", bounce: 0.3, duration: 0.3 },
+            }}
+            className="flex flex-col"
+          >
+            <ChatBubble variant="received">
+              <ChatBubbleAvatar src="" fallback="🤖" />
+              <ChatBubbleMessage variant="received">
+                Hello! How can I help you today?
+              </ChatBubbleMessage>
+            </ChatBubble>
+          </motion.div>
+
+          {/* ✅ All dynamic messages */}
+          {messages.map((message, index) => (
+            <motion.div
+              key={index}
+              layout
+              initial={{ opacity: 0, scale: 1, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 1, y: 1 }}
+              transition={{
+                opacity: { duration: 0.1 },
+                layout: {
+                  type: "spring",
+                  bounce: 0.3,
+                  duration: index * 0.05 + 0.2,
+                },
+              }}
+              className="flex flex-col"
+            >
+              <ChatBubble variant={message.sender === "user" ? "sent" : "received"}>
+                <ChatBubbleAvatar
+                  src={
+                    message.sender === "user"
+                      ? "https://avatars.githubusercontent.com/u/114422072?s=400"
+                      : ""
+                  }
+                  fallback={message.sender === "user" ? "US" : "🤖"}
+                />
+                <ChatBubbleMessage
+                  variant={message.sender === "user" ? "sent" : "received"}
                 >
-                  <ChatBubble
-                    key={message.id}
-                    variant={message.sender === "user" ? "sent" : "received"}
-                  >
-                    <ChatBubbleAvatar
-                      src={
-                        message.sender === "user"
-                          ? "https://avatars.githubusercontent.com/u/114422072?s=400&u=8a176a310ca29c1578a70b1c33bdeea42bf000b4&v=4"
-                          : ""
-                      }
-                      fallback={message.sender === "user" ? "US" : "🤖"}
-                    />
-                    <ChatBubbleMessage
-                      variant={message.sender === "user" ? "sent" : "received"}
-                    >
-                      {message.content}
-                    </ChatBubbleMessage>
-                  </ChatBubble>
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
+                  {message.content}
+                </ChatBubbleMessage>
+              </ChatBubble>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+
         </ChatMessageList>
       </ExpandableChatBody>
       <ExpandableChatFooter>

@@ -49,7 +49,7 @@ goalSchema.pre("save", function (next) {
   next();
 });
 
-// Optional: recalculate progress/status on update
+// Recalculate progress/status on update
 goalSchema.pre("findOneAndUpdate", function (next) {
   const update = this.getUpdate();
   if (update.currentAmount !== undefined || update.targetAmount !== undefined) {

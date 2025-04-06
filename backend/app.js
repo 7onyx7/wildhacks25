@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const { logger } = require('./utils/logger');
-const database = require('./utils/db');
+const database = require('./config/db');
 
 // Initialize Express app
 const app = express();
@@ -27,13 +27,13 @@ app.use('/api', transactionRoutes);
 app.use('/api', analyticsRoutes);
 app.use('/api', goalRoutes);
 
-// Error handling middleware
+// Error handler
 app.use((err, req, res, next) => {
   logger.error(err.stack);
   res.status(500).json({
     success: false,
-    message: 'An internal server error occurred',
-    error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    message: "An internal server error occurred",
+    error: process.env.NODE_ENV === "development" ? err.message : undefined,
   });
 });
 
@@ -51,13 +51,14 @@ const startServer = async () => {
   }
 };
 
-// Handle graceful shutdown
-process.on('SIGINT', async () => {
+// Graceful shutdown
+process.on("SIGINT", async () => {
   try {
     await database.close();
+    logger.info("🛑 MongoDB connection closed.");
     process.exit(0);
   } catch (error) {
-    logger.error('Error during shutdown:', error);
+    logger.error("Error during shutdown:", error);
     process.exit(1);
   }
 });

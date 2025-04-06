@@ -1,65 +1,70 @@
-const { MongoClient, ObjectId } = require('mongodb');
+const mongoose = require("mongoose");
 
-class Goal {
-  constructor(db) {
-    this.collection = db.collection('goals');
+const goalSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: "User", // Optional: link to a User model if one exists
+  },
+  title: {
+    type: String,
+    required: true,
+  },
+  description: String,
+  targetAmount: {
+    type: Number,
+    required: true,
+  },
+  currentAmount: {
+    type: Number,
+    default: 0,
+  },
+  progress: {
+    type: Number,
+    default: 0, // will be auto-calculated
+  },
+  status: {
+    type: String,
+    enum: ["in-progress", "completed"],
+    default: "in-progress",
+  },
+  targetDate: {
+    type: Date,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+// Auto-calculate progress and status before saving
+goalSchema.pre("save", function (next) {
+  this.progress = this.currentAmount / this.targetAmount;
+  this.status = this.currentAmount >= this.targetAmount ? "completed" : "in-progress";
+  this.updatedAt = new Date();
+  next();
+});
+
+// Optional: recalculate progress/status on update
+goalSchema.pre("findOneAndUpdate", function (next) {
+  const update = this.getUpdate();
+  if (update.currentAmount !== undefined || update.targetAmount !== undefined) {
+    this.findOne().then((doc) => {
+      const newCurrent = update.currentAmount ?? doc.currentAmount;
+      const newTarget = update.targetAmount ?? doc.targetAmount;
+      update.progress = newCurrent / newTarget;
+      update.status = newCurrent >= newTarget ? "completed" : "in-progress";
+      update.updatedAt = new Date();
+      this.setUpdate(update);
+      next();
+    });
+  } else {
+    next();
   }
+});
 
-  async create(userId, goalData) {
-    const goal = {
-      userId,
-      ...goalData,
-      currentAmount: goalData.currentAmount || 0,
-      progress: (goalData.currentAmount || 0) / goalData.targetAmount,
-      status: goalData.currentAmount >= goalData.targetAmount ? 'completed' : 'in-progress',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    const result = await this.collection.insertOne(goal);
-    return { ...goal, _id: result.insertedId };
-  }
-
-  async findByUserId(userId) {
-    return await this.collection
-      .find({ userId })
-      .sort({ createdAt: -1 })
-      .toArray();
-  }
-
-  async findOne(goalId) {
-    return await this.collection.findOne({ _id: new ObjectId(goalId) });
-  }
-
-  async update(goalId, goalData) {
-    // Calculate progress if needed
-    let updateData = { ...goalData };
-    if ('currentAmount' in goalData && 'targetAmount' in goalData) {
-      updateData.progress = goalData.currentAmount / goalData.targetAmount;
-      updateData.status = goalData.currentAmount >= goalData.targetAmount ? 'completed' : 'in-progress';
-    } else if ('currentAmount' in goalData) {
-      const goal = await this.findOne(goalId);
-      if (goal) {
-        updateData.progress = goalData.currentAmount / goal.targetAmount;
-        updateData.status = goalData.currentAmount >= goal.targetAmount ? 'completed' : 'in-progress';
-      }
-    }
-    
-    const result = await this.collection.findOneAndUpdate(
-      { _id: new ObjectId(goalId) },
-      {
-        $set: {
-          ...updateData,
-          updatedAt: new Date()
-        }
-      },
-      { returnDocument: 'after' }
-    );
-    return result.value;
-  }
-
-  async delete(goalId) {
-    return await this.collection.deleteOne({ _id: new ObjectId(goalId) });
-  }
-}
-
-module.exports = Goal;
+module.exports = mongoose.model("Goal", goalSchema);

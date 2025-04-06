@@ -1,65 +1,63 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const { logger } = require('./utils/logger');
-const database = require('./utils/db');
-
-// Initialize Express app
+require("dotenv").config();
+const express = require("express");
 const app = express();
+const cors = require("cors");
+const mongoose = require("mongoose");
 
 // Middleware
 app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Import routes
-const financialRoutes = require('./routes/financialRoutes');
-const budgetRoutes = require('./routes/budgetRoutes');
-const transactionRoutes = require('./routes/transactionRoutes');
-const analyticsRoutes = require('./routes/analyticsRoutes');
-const goalRoutes = require('./routes/goalRoutes');
+// Root endpoint
+app.get("/", (req, res) => {
+  res.send("Gemmarize backend is up and running, CORS allowed.");
+});
 
-// Use routes
-app.use('/api', financialRoutes);
-app.use('/api', budgetRoutes);
-app.use('/api', transactionRoutes);
-app.use('/api', analyticsRoutes);
-app.use('/api', goalRoutes);
+// Routes
+const financialRoutes = require("./routes/financialRoutes");
+const budgetRoutes = require("./routes/budgetRoutes");
+const transactionRoutes = require("./routes/transactionRoutes");
+const analyticsRoutes = require("./routes/analyticsRoutes");
+const goalRoutes = require("./routes/goalRoutes");
+const chatLogRoutes = require("./routes/chatLogRoutes");
+const geminiRoutes = require("./routes/geminiRoutes");
 
-// Error handling middleware
+app.use("/api", financialRoutes);
+app.use("/api", budgetRoutes);
+app.use("/api", transactionRoutes);
+app.use("/api", analyticsRoutes);
+app.use("/api/goals", goalRoutes);
+app.use("/api/chatlogs", chatLogRoutes);
+app.use("/api/gemini", geminiRoutes);
+
+// 404 fallback
+app.use((req, res) => {
+  res.status(404).json({ error: "Route not found" });
+});
+
+// Error handler
 app.use((err, req, res, next) => {
-  logger.error(err.stack);
+  console.error("Unhandled Error:", err.stack);
   res.status(500).json({
     success: false,
-    message: 'An internal server error occurred',
-    error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    message: "Internal server error",
+    error: process.env.NODE_ENV === "development" ? err.message : undefined,
   });
 });
 
-// Initialize database and start server
-const startServer = async () => {
-  try {
-    await database.connect();
-    const PORT = process.env.PORT || 3000;
+// MongoDB Connect + Server Start
+const PORT = process.env.PORT || 3000;
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log("✅ MongoDB connected");
     app.listen(PORT, () => {
-      logger.info(`Server is running on port ${PORT}`);
+      console.log(`🚀 Server running at http://localhost:${PORT}`);
+      console.log(`🔗 Click to open: http://localhost:${PORT}`);
     });
-  } catch (error) {
-    logger.error('Failed to start server:', error);
+  })
+  .catch((err) => {
+    console.error("❌ MongoDB connection error:", err);
     process.exit(1);
-  }
-};
-
-// Handle graceful shutdown
-process.on('SIGINT', async () => {
-  try {
-    await database.close();
-    process.exit(0);
-  } catch (error) {
-    logger.error('Error during shutdown:', error);
-    process.exit(1);
-  }
-});
-
-startServer();
+  });

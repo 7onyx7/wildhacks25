@@ -6,6 +6,8 @@ import Home from "./components/scenes/home";
 import UploadPage from "./components/scenes/predict/upload-content";
 import Predict from "./components/scenes/predict";
 import ResultsHistoryPage from "./components/scenes/history/results-history";
+import History from "./components/scenes/history";
+import Timeline from "./components/scenes/timeline";
 
 
 
@@ -20,7 +22,13 @@ function AppRoutes() {
         <Route path="/predict" element={<Predict />}>
             <Route index element={<UploadPage />} />
         </Route>
-        <Route path="/history" element={<Predict />}>
+        <Route path="/history" element={<History />}>
+            <Route index element={<ResultsHistoryPage />} />
+        </Route>
+        <Route path="/goals" element={<Predict />}>
+            <Route index element={<ResultsHistoryPage />} />
+        </Route>
+        <Route path="/timeline" element={<Timeline />}>
             <Route index element={<ResultsHistoryPage />} />
         </Route>
     </Routes>

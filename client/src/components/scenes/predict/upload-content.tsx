@@ -10,11 +10,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import {
-//  Upload,
-     MessageSquareWarning,
-      Twitter,
-       MailWarning, 
-       Upload} from "lucide-react"
+      Upload,
+      CircleDollarSign,
+      Calendar} from "lucide-react"
 // import { predictTimeline } from "@/hooks/predicter"
 import { useToast } from "@/hooks/use-toast";
 import UploadProgress from "@/components/upload-progress"
@@ -22,9 +20,18 @@ import UploadProgress from "@/components/upload-progress"
 // import AnalysisResultCard, { AnalysisResultProps } from "@/components/analysis-results-card"
 
 
+interface TransactionPayload {
+  itemName: string;
+  price: number;
+  reason: string;
+  description: string;
+  link?: string;
+  instructions?: string;
+}
+
 
 export default function UploadPage() {
-  const [activeTab, setActiveTab] = useState("tweet")
+  const [activeTab, setActiveTab] = useState("file")
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [textContent, setTextContent] = useState("")
@@ -33,6 +40,12 @@ export default function UploadPage() {
   const { toast } = useToast()
 //   const [latestResult, setLatestResult] = useState<AnalysisResultProps | null>(null)
 //   const [resultHistory, setResultHistory] = useState<AnalysisResultProps[]>([])
+const [itemName, setItemName] = useState("");
+const [price, setPrice] = useState<number | null>(null);
+const [reason, setReason] = useState("");
+const [description, setDescription] = useState("");
+const [link, setLink] = useState("");
+
 
 
 
@@ -77,111 +90,175 @@ export default function UploadPage() {
     return interval
   }
 
-  const handleUpload = async () => {
-    const progressInterval = simulateUploadProgress()
+  // const handleUpload = async () => {
+  //   const progressInterval = simulateUploadProgress()
 
-    try {
-        let content: string | File | undefined
-        let contentType: "tweet" | "text" | "email" | "file" | undefined
+  //   try {
+  //       let content: string | File | undefined
+  //       let contentType: "tweet" | "text" | "email" | "file" | undefined
 
-      if (activeTab === "file") {
-        if (!selectedFile) {
-          toast({
-            title: "No file selected",
-            description: "Please choose a file to upload",
-            variant: "destructive",
-          })
-          clearInterval(progressInterval)
-          setIsUploading(false)
-          return
-        }
-        content = selectedFile
-        contentType = "file"
-      } else if (activeTab === "text" || activeTab === "tweet") {
-        if (!textContent.trim()) {
-          toast({
-            title: "No content provided",
-            description: `Please enter some ${activeTab} content to analyze`,
-            variant: "destructive",
-          })
-          clearInterval(progressInterval)
-          setIsUploading(false)
-          return
-        }
-        content = textContent
-        contentType = activeTab as "text" | "tweet" | "email"
-    }
+  //     if (activeTab === "file") {
+  //       if (!selectedFile) {
+  //         toast({
+  //           title: "No file selected",
+  //           description: "Please choose a file to upload",
+  //           variant: "destructive",
+  //         })
+  //         clearInterval(progressInterval)
+  //         setIsUploading(false)
+  //         return
+  //       }
+  //       content = selectedFile
+  //       contentType = "file"
+  //     } else if (activeTab === "text" || activeTab === "tweet") {
+  //       if (!textContent.trim()) {
+  //         toast({
+  //           title: "No content provided",
+  //           description: `Please enter some ${activeTab} content to analyze`,
+  //           variant: "destructive",
+  //         })
+  //         clearInterval(progressInterval)
+  //         setIsUploading(false)
+  //         return
+  //       }
+  //       content = textContent
+  //       contentType = activeTab as "text" | "tweet" | "email"
+  //   }
 
 
-    if (typeof content !== "string" || !contentType || contentType === "file") {
-        toast({
-          title: "Unsupported content",
-          description: "Only text, tweet, and email are supported for now.",
-          variant: "destructive",
-        })
-        clearInterval(progressInterval)
-        setIsUploading(false)
-        return
-      }
+  //   if (typeof content !== "string" || !contentType || contentType === "file") {
+  //       toast({
+  //         title: "Unsupported content",
+  //         description: "Only text, tweet, and email are supported for now.",
+  //         variant: "destructive",
+  //       })
+  //       clearInterval(progressInterval)
+  //       setIsUploading(false)
+  //       return
+  //     }
   
 
-      //TODO: FIX(API): fix api call and replace w transformer
-    //   const result = await predictTimeline(content, contentType)
-    //   setLatestResult({
-    //     inputText: content,
-    //     label: result.label as "malicious" | "neutral" | "informational" | "safe" | "error",
-    //     confidence: result.confidence,
-    //     type: contentType,
-    //     timestamp: new Date().toISOString(),
-    //   })
+  //     //TODO: FIX(API): fix api call and replace w transformer
+  //   //   const result = await predictTimeline(content, contentType)
+  //   //   setLatestResult({
+  //   //     inputText: content,
+  //   //     label: result.label as "malicious" | "neutral" | "informational" | "safe" | "error",
+  //   //     confidence: result.confidence,
+  //   //     type: contentType,
+  //   //     timestamp: new Date().toISOString(),
+  //   //   })
 
-    //   const newResult: AnalysisResultProps = {
-    //     inputText: content,
-    //     label: result.label as "malicious" | "neutral" | "informational" | "safe" | "error",
-    //     confidence: result.confidence,
-    //     type: contentType,
-    //     timestamp: new Date().toISOString(),
-    //   }
+  //   //   const newResult: AnalysisResultProps = {
+  //   //     inputText: content,
+  //   //     label: result.label as "malicious" | "neutral" | "informational" | "safe" | "error",
+  //   //     confidence: result.confidence,
+  //   //     type: contentType,
+  //   //     timestamp: new Date().toISOString(),
+  //   //   }
       
-    //   setLatestResult(newResult)
-    //   setResultHistory((prev) => [newResult, ...prev])
+  //   //   setLatestResult(newResult)
+  //   //   setResultHistory((prev) => [newResult, ...prev])
       
 
 
-    //   toast({
-    //     title: `Threat Level: ${result.label.toUpperCase()}`,
-    //     description: `Confidence: ${(result.confidence * 100).toFixed(1)}%`,
-    //     variant: result.label === "malicious" ? "destructive" : "default",
-    //   })
+  //   //   toast({
+  //   //     title: `Threat Level: ${result.label.toUpperCase()}`,
+  //   //     description: `Confidence: ${(result.confidence * 100).toFixed(1)}%`,
+  //   //     variant: result.label === "malicious" ? "destructive" : "default",
+  //   //   })
       
-      // Ensure progress completes
+  //     // Ensure progress completes
+  //     setTimeout(() => {
+  //       clearInterval(progressInterval)
+  //       setUploadProgress(100)
+
+  //       setTimeout(() => {
+  //         setIsUploading(false)
+  //         setSelectedFile(null)
+  //         setTextContent("")
+
+  //         toast({
+  //           title: "Upload successful",
+  //           description: "Your content has been submitted for moderation",
+  //         })
+  //       }, 500)
+  //     }, 1000)
+  //   } catch (err) {
+  //       console.error("Upload failed:", err)
+  //     clearInterval(progressInterval)
+  //     setIsUploading(false)
+
+  //     toast({
+  //       title: "Upload failed",
+  //       description: "There was an error uploading your content",
+  //       variant: "destructive",
+  //     })
+  //   }
+  // }
+
+  const handleUpload = async () => {
+    const progressInterval = simulateUploadProgress();
+    try {
+      if (!itemName || price === null || !reason || !description) {
+        toast({
+          title: "Missing fields",
+          description: "Please fill in all required fields (item, price, reason, description).",
+          variant: "destructive",
+        });
+        clearInterval(progressInterval);
+        setIsUploading(false);
+        return;
+      }
+  
+      const payload: TransactionPayload = {
+        itemName,
+        price,
+        reason,
+        description,
+        link,
+        instructions,
+      };
+  
+      const response = await fetch("http://localhost:3000/api/gemini/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+  
+      const result = await response.json();
+      console.log("Prediction result:", result);
+  
+      // Show toast or update state as needed
+      toast({
+        title: "Prediction Complete",
+        description: "Gemini processed the transaction and updated your timeline.",
+      });
+  
       setTimeout(() => {
-        clearInterval(progressInterval)
-        setUploadProgress(100)
-
+        clearInterval(progressInterval);
+        setUploadProgress(100);
         setTimeout(() => {
-          setIsUploading(false)
-          setSelectedFile(null)
-          setTextContent("")
-
-          toast({
-            title: "Upload successful",
-            description: "Your content has been submitted for moderation",
-          })
-        }, 500)
-      }, 1000)
+          setIsUploading(false);
+          setItemName("");
+          setPrice(null);
+          setReason("");
+          setDescription("");
+          setLink("");
+          setInstructions("");
+        }, 500);
+      }, 1000);
     } catch (err) {
-        console.error("Upload failed:", err)
-      clearInterval(progressInterval)
-      setIsUploading(false)
-
+      console.error("Upload failed:", err);
+      clearInterval(progressInterval);
+      setIsUploading(false);
       toast({
         title: "Upload failed",
-        description: "There was an error uploading your content",
+        description: "There was an error processing the transaction.",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
+  
 
   const handleSample = () => {
     // const random = sampleTweets[Math.floor(Math.random() * sampleTweets.length)]
@@ -193,32 +270,28 @@ export default function UploadPage() {
 
   return (
     <div className="container max-w-4xl py-12">
-      <h1 className="text-3xl font-bold mb-8 text-center">Upload Content for Analysis</h1>
+      <h1 className="text-3xl font-bold mb-8 text-center">Input an expense or income</h1>
 
       <Card>
         <CardHeader>
-          <CardTitle>Upload Content</CardTitle>
-          <CardDescription>Paste or uploads tweets, texts, or emails to scan for potential threats.</CardDescription>
+          <CardTitle>ForeCache Finances</CardTitle>
+          <CardDescription>Input a transaction or upload a collection.</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
           {/* //TODO: FIX(UI): fix grid cols to match # of active triggers */}
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="file" className="flex items-center gap-2">
                 <Upload className="h-4 w-4" />
                 <span>File</span>
               </TabsTrigger>
-              <TabsTrigger value="text" className="flex items-center gap-2">
-                <Twitter className="h-4 w-4" />
-                <span>Text</span>
+              <TabsTrigger value="transactions" className="flex items-center gap-2">
+                <CircleDollarSign className="h-4 w-4" />
+                <span>Transactions</span>
               </TabsTrigger>
-              <TabsTrigger value="tweet" className="flex items-center gap-2">
-              <Twitter className="h-4 w-4" />
-                <span>Tweet</span>
-              </TabsTrigger>
-              <TabsTrigger value="email" className="flex items-center gap-2">
-                <MailWarning className="h-4 w-4" />
-                <span>Email</span>
+              <TabsTrigger value="lifestyle" className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+                <span>Lifestyle</span>
               </TabsTrigger>
             </TabsList>
 
@@ -235,7 +308,7 @@ export default function UploadPage() {
                 ) : (
                   <>
                     <Upload className="h-8 w-8 mb-4 text-gray-400" />
-                    <p className="text-sm font-medium mb-1">Drag and drop a file, or click for file explorer</p>
+                    <p className="text-sm font-medium mb-1">Drag and drop a file, or browse file explorer</p>
                     <p className="text-xs text-gray-500 mb-4">Supports PDF, Docx, and Excel up to 10MB</p>
                     <input
                       type="file"
@@ -254,7 +327,7 @@ export default function UploadPage() {
               </div>
               <div className="mt-6">
                 <Textarea
-                  placeholder="Include custom instructions for the summary (e.g., 'Focus on methodology only', 'Use bullet points', 'Highlight key points')"
+                  placeholder="Provide any info you'd like Gemini to know about these transactions"
                   value={instructions}
                   onChange={(e) => setInstructions(e.target.value)}
                   className="min-h-[100px]"
@@ -265,9 +338,9 @@ export default function UploadPage() {
               </div>
             </TabsContent>
 
-            <TabsContent value="text" className="mt-6">
+            <TabsContent value="transactions" className="mt-6">
               <Textarea
-                placeholder="Submit text message content for predictions..."
+                placeholder="Current ForeCache"
                 className="min-h-[200px]"
                 value={textContent}
                 onChange={(e) => setTextContent(e.target.value)}
@@ -276,64 +349,58 @@ export default function UploadPage() {
                 Transaction will be analyzed to predict financial future.
               </p>
               <div className="mt-6">
-                <Textarea
-                  placeholder="Include custom instructions for the summary (e.g., 'Focus on methodology only', 'Use bullet points', 'Highlight key points')"
-                  value={instructions}
-                  onChange={(e) => setInstructions(e.target.value)}
-                  className="min-h-[100px]"
-                />
-                <p className="text-xs text-gray-500 mt-2">
-                These transactions will be added to your financial context.
-                </p>
-              </div>
-            </TabsContent>
-            <TabsContent value="email" className="mt-6">
               <Textarea
-                placeholder="Submit email content for predictions..."
-                className="min-h-[200px]"
-                value={textContent}
+                placeholder="Item name"
+                className="w-full mb-2 p-2 rounded border"
+                value={itemName}
                 onChange={(e) => setTextContent(e.target.value)}
               />
-              <p className="text-xs text-gray-500 mt-2">
-                Event will be analyzed to predict financial future.
-              </p>
-              <div className="mt-6">
-                <Textarea
-                  placeholder="Include custom instructions for the summary (e.g., 'Focus on methodology only', 'Use bullet points', 'Highlight key points')"
-                  value={instructions}
-                  onChange={(e) => setInstructions(e.target.value)}
-                  className="min-h-[100px]"
-                />
-                <p className="text-xs text-gray-500 mt-2">
-                  These instructions will be passed to Gemini to guide the summarization.
-                </p>
-              </div>
-              <div className="mt-6">
-                <Textarea
-                  placeholder="Include custom instructions for the summary (e.g., 'Focus on methodology only', 'Use bullet points', 'Highlight key points')"
-                  value={instructions}
-                  onChange={(e) => setInstructions(e.target.value)}
-                  className="min-h-[100px]"
-                />
-                <p className="text-xs text-gray-500 mt-2">
-                Event will be analyzed to predict financial future.
-                </p>
-              </div>
-            </TabsContent>
 
-            <TabsContent value="tweet" className="mt-6">
               <Textarea
-                placeholder="Submit a tweet for analysis..."
-                className="min-h-[150px]"
+                placeholder="Transaction Amount"
+                className="w-full mb-2 p-2 rounded border"
+                value={price ?? ""}
+                onChange={(e) => setTextContent(e.target.value)}
+              />
+
+              <Textarea
+                placeholder="Reason for purchase"
+                className="w-full mb-2 p-2 rounded border"
+                value={reason}
+                onChange={(e) => setTextContent(e.target.value)}
+              />
+
+              <Textarea
+                placeholder="Description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full mb-2 p-2 rounded border"
+              />
+
+                <Textarea
+                  placeholder="Link an item (e.g., Amazon product)"
+                  value={instructions}
+                  onChange={(e) => setInstructions(e.target.value)}
+                  className="w-full mb-2 p-2 rounded border"
+                  />
+                <p className="text-xs text-gray-500 mt-2">
+                This transaction will be added to your financial context.
+                </p>
+              </div>
+            </TabsContent>
+            <TabsContent value="lifestyle" className="mt-6">
+              <Textarea
+                placeholder="Add new lifestyle event to update predictions..."
+                className="min-h-[50px]"
                 value={textContent}
                 onChange={(e) => setTextContent(e.target.value)}
               />
               <p className="text-xs text-gray-500 mt-2">
-                Tweet will be analyzed for potential threats and suspicious content.
+                Event will be analyzed to predict financial future.
               </p>
               <div className="mt-6">
                 <Textarea
-                  placeholder="Include custom instructions for the summary (e.g., 'Focus on methodology only', 'Use bullet points', 'Highlight key points')"
+                  placeholder="Briefly explain the lifestyle changes"
                   value={instructions}
                   onChange={(e) => setInstructions(e.target.value)}
                   className="min-h-[100px]"
@@ -344,7 +411,7 @@ export default function UploadPage() {
               </div>
               <div className="mt-6">
                 <Textarea
-                  placeholder="Include custom instructions for the summary (e.g., 'Focus on methodology only', 'Use bullet points', 'Highlight key points')"
+                  placeholder="How long do you estimate this lifestyle habbit will occurr ? "
                   value={instructions}
                   onChange={(e) => setInstructions(e.target.value)}
                   className="min-h-[100px]"

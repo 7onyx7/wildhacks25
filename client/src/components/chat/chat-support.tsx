@@ -11,12 +11,12 @@ import { ExpandableChat, ExpandableChatHeader, ExpandableChatBody, ExpandableCha
 import { AnimatePresence, motion } from "framer-motion";
 import { useChatStore } from "@/hooks/useChatStore";
 
-interface Message {
-  id: string;
-  content: string;
-  sender: "user" | "ai";
-  timestamp: string;
-}
+// interface Message {
+//   id: string;
+//   content: string;
+//   sender: "user" | "ai";
+//   timestamp: string;
+// }
 
 export default function ChatSupport() {
 
@@ -67,7 +67,6 @@ export default function ChatSupport() {
           className="dark:bg-muted/40"
         >
         <AnimatePresence>
-          {/* 👋 Static welcome message */}
           <motion.div
             layout
             initial={{ opacity: 0, scale: 1, y: 10 }}
@@ -87,7 +86,7 @@ export default function ChatSupport() {
             </ChatBubble>
           </motion.div>
 
-          {/* ✅ All dynamic messages */}
+          {/* All messages */}
           {messages.map((message, index) => (
             <motion.div
               key={index}
@@ -109,7 +108,7 @@ export default function ChatSupport() {
                 <ChatBubbleAvatar
                   src={
                     message.sender === "user"
-                      ? "https://avatars.githubusercontent.com/u/114422072?s=400"
+                      ? "https://api.dicebear.com/9.x/fun-emoji/svg"
                       : ""
                   }
                   fallback={message.sender === "user" ? "US" : "🤖"}
